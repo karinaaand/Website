@@ -11,21 +11,23 @@
     <div class="rounded-lg bg-white p-6 shadow-lg">
         <div class="mb-4 flex items-center">
             <div class="flex-1 mr-5">
-                <h2 class="text-2xl font-bold text-left">{{ App\Models\Profile::first()->name }}</h2>
-                <h2 class="text text-left">{{ App\Models\Profile::first()->address }}</h2>
-                <h2 class="text text-left">{{ App\Models\Profile::first()->phone }}</h2>
+                <h2 class="text-2xl font-bold text-left" id="profile_name">{{ App\Models\Profile::first()->name }}</h2>
+                <h2 class="text text-left" id="profile_address">{{ App\Models\Profile::first()->address }}</h2>
+                <h2 class="text text-left" id="profile_phone">{{ App\Models\Profile::first()->phone }}</h2>
             </div>
             <div class="flex-[1.5] flex flex-col  items-center justify-center">
                 <div class="flex items-center">
                     <span class="mr-2 text-lg font-normal text-black">No. LPB :</span>
-                    <span class="text-lg font-normal">{{ $transaction->code }}</span>
+                    <span class="text-lg font-normal" id="transactionCode">
+                        {{--  {{ $transaction->code }}  --}}
+                    </span>
                 </div>
                 <h1 class="text-center text-2xl font-bold">LAPORAN PENERIMAAN KLINIK</h1>
             </div>
             <div class="flex-1 ml-10">
-                <p class="text-lg mb-4 text-left">Tanggal:
-                    {{ Carbon::parse($transaction->created_at)->translatedFormat('j F Y') }}</p>
-            </div>
+                <p class="text-lg mb-4 text-left">Tanggal: <span id="transactionDate"></span>
+                    {{-- {{ Carbon::parse($transaction->created_at)->translatedFormat('j F Y') }}  --}}
+                </p>              </div>
         </div>
         <div class="overflow-hidden rounded-lg bg-white shadow-md mt-8">
             <table class="min-w-full leading-normal">
@@ -39,8 +41,8 @@
                         <th class="border p-2">Subtotal</th>
                     </tr>
                 </thead>
-                <tbody class="text-sm font-light text-gray-700">
-                    @foreach ($details as $number => $item)
+                <tbody id="detailsTable" class="text-sm font-light text-gray-700">
+                    {{--  @foreach ($details as $number => $item)
                         <tr class="border-b border-gray-200 hover:bg-gray-100">
                             <td class="px-6 py-3 text-center">{{ $number + 1 }}</td>
                             <td class="px-6 py-3 text-center">{{ $item->drug()->code }}</td>
@@ -51,11 +53,12 @@
                             <td class="px-6 py-3 text-center">{{ 'Rp ' . number_format($item->total_price, 0, ',', '.') }}
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach  --}}
                 </tbody>
             </table>
-            <h2 type="text" class="text-right mt-6 pe-6 pb-6">Grand total :
-                {{ 'Rp ' . number_format($details->sum('total_price'), 0, ',', '.') }}</h2>
+            <h2 type="text" class="text-right mt-6 pe-6 pb-6">Grand total : <span id="grandTotal"></span>
+                {{--  {{ 'Rp ' . number_format($details->sum('total_price'), 0, ',', '.') }}  --}}
+            </h2>
         </div>
     </div>
     <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -90,6 +93,70 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Function untuk mengambil detail transaksi
+    // function fetchTransactionDetails(transactionId) {
+        const currentUrl = window.location.href.split('/');
+        const ids = currentUrl.pop();
+        console.log(ids); //buat cetak panggil ids/ yang berakhiran id menggunakan ids
+        const token = localStorage.getItem('token'); // Masukkan token yang sudah ada
+        axios.get(`http://localhost:8000/api/v1/inventory/inflows/${ids}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(function (response) {
+            // Menangani respons sukses
+            console.log(response.data);
+            const data = response.data.data;
+            // Menampilkan data pada elemen HTML
+            const user = JSON.parse(localStorage.getItem('user'));
+            console.log(user)
+            document.getElementById('profile_name').textContent = user.name;
+            document.getElementById('profile_phone').textContent = user.phone;
+            document.getElementById('profile_address').textContent = user.address;
+            document.getElementById('transactionCode').textContent = data['No. LPB'];
+            document.getElementById('transactionDate').textContent = data['Date'];
+            document.getElementById('grandTotal').textContent = 'Rp ' + data['Grand_total'];
+
+            // Menampilkan detail item obat
+            const details = data['Details'];
+            let tableContent = '';
+            details.forEach((item, index) => {
+                tableContent += `
+                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="px-6 py-3 text-center">${index + 1}</td>
+                        <td class="px-6 py-3 text-center">${item.drug_code}</td>
+                        <td class="px-6 py-3 text-left">${item.drug_name}</td>
+                        <td class="px-6 py-3 text-center">${item.total}</td>
+                        <td class="px-6 py-3 text-center">${'Rp ' + formatCurrency(item.piece_price)}</td>
+                        <td class="px-6 py-3 text-center">${'Rp ' + formatCurrency(item.subtotal)}</td>
+                    </tr>
+                `;
+            });
+            console.log(tableContent);
+
+            // Update tabel dengan data
+            document.getElementById('detailsTable').innerHTML = tableContent;
+        })
+        .catch(function (error) {
+            // Menangani kesalahan
+            console.error('Error fetching transaction details:', error);
+        });
+
+        // Format angka
+    function formatCurrency(value) {
+        return value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    // Panggil fungsi ini saat halaman dimuat dengan ID transaksi
+    document.addEventListener('DOMContentLoaded', function () {
+        const transactionId = '{{ $transaction->id }}';  // Ganti dengan ID transaksi yang sesuai
+        fetchTransactionDetails(transactionId);
+    });
+    // }
+    </script>
 
     <script>
         function uploadModal() {
@@ -118,10 +185,10 @@
                 return;
             }
 
-            console.log("Download button clicked, transaction ID:", transaction_id); // Debugging
+            console.log("Download button clicked, transaction ID:", ids); // Debugging
 
             // Redirect langsung ke endpoint Laravel
-            window.location.href = `/clinic/generate-pdf/${transaction_id}`;
+            window.location.href = `/clinic/generate-pdf/${ids}`;
         }
 
         document.getElementById('confirmPrint').onclick = function() {

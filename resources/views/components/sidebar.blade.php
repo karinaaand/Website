@@ -37,10 +37,12 @@
                         class="inline-flex items-center justify-center w-6 h-6 p-2 ml-8 text-sm font-medium text-red-800 bg-red-100 rounded-full dark:bg-orange-600 dark:text-white">6</span> --}}
                 </a>
             </li>
-            @if (auth()->user()->role != 'doctor')
 
 
-            <li>
+            {{--  @if (auth()->user()->role != 'doctor')  --}}
+
+
+            <li id="list-masterdata" style="display:none">
                 <button type="button"
                     class="flex items-center w-full p-2 text-base transition duration-75 rounded-lg group
                     @if (str_contains(request()->route()->getName(), 'masterdata')) bg-gray-300 hover:bg-gray-400
@@ -152,7 +154,7 @@
                     </li>
                 </ul>
             </li>
-            <li>
+            <li id="inventory" style="display:none">
                 <button type="button"
                     class="flex items-center w-full p-2 text-base transition duration-75 rounded-lg group
                 @if (str_contains(request()->route()->getName(), 'inventory')) bg-gray-300 hover:bg-gray-400
@@ -215,7 +217,11 @@
                     </li>
                 </ul>
             </li>
-            @endif
+
+
+            {{--  @endif  --}}
+
+
             <li>
                 <button type="button"
                     class="flex items-center w-full p-2 text-base transition duration-75 rounded-lg group
@@ -277,8 +283,12 @@
                     </li>
                 </ul>
             </li>
-            @if (auth()->user()->role != 'doctor')
-            <li>
+
+
+            {{--  @if (auth()->user()->role != 'doctor')  --}}
+
+
+            <li id="laporan" style="display: none">
                 <button type="button"
                     class="flex items-center w-full p-2 text-base transition duration-75 rounded-lg group
                     @if (str_contains(request()->route()->getName(), 'report')) bg-gray-300 hover:bg-gray-400
@@ -339,7 +349,7 @@
                     </li>
                 </ul>
             </li>
-            <li>
+            <li id="transaksi" style="display:none">
                 <button type="button"
                     class="flex items-center w-full p-2 text-base transition duration-75 rounded-lg group
                 @if (str_contains(request()->route()->getName(), 'management')) bg-gray-300 hover:bg-gray-400
@@ -420,7 +430,11 @@
                     </li>
                 </ul>
             </li>
-            @endif
+
+
+            {{--  @endif  --}}
+
+
             <li>
                 <a href="{{ route('user.index') }}"
                     class="flex items-center p-2 transition duration-75 rounded-lg group
@@ -445,6 +459,15 @@
 
 
 <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (user.role !== 'dokter') {
+         document.getElementById('list-masterdata').style.display = "block";
+         document.getElementById('inventory').style.display = "block";
+         document.getElementById('transaksi').style.display = "block";
+         document.getElementById('laporan').style.display = "block";
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         const dropdownToggles = document.querySelectorAll('[data-collapse-toggle]');
 

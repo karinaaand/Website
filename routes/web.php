@@ -69,17 +69,34 @@ Route::controller(UserController::class)->group(function () {
     Route::get('reset-password/{token}', 'showResetForm')->name('password.reset');
     Route::post('reset-password', 'resetPassword')->name('user.password');
 
-    Route::match(['get', 'put'], '/settings', 'settings')->name('user.settings')->middleware('auth');
+    Route::match(['get', 'put'], '/settings', 'settings')->name('user.settings');
     Route::get("/logout", 'logout')->name("user.logout");
 });
 
-Route::middleware('auth')->group(function () {
-    Route::redirect('/', '/dashboard');
-    Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
-    Route::get('dashboard/chart-penjualan', [DashboardController::class, 'penjualan'])->name('dashboard.chart-penjualan');
-    Route::get('dashboard/chart-obat', [DashboardController::class, 'obat'])->name('dashboard.chart-obat');
-    Route::resource('transaction', TransactionController::class)->except(['edit', 'update', 'destroy']);
-    Route::resource('user', UserController::class)->except(['show']);
+Route::redirect('/', '/dashboard');
+Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+Route::get('dashboard/chart-penjualan', [DashboardController::class, 'penjualan'])->name('dashboard.chart-penjualan');
+Route::get('dashboard/chart-obat', [DashboardController::class, 'obat'])->name('dashboard.chart-obat');
+Route::resource('transaction', TransactionController::class)->except(['edit', 'update', 'destroy']);
+Route::resource('user', UserController::class)->except(['show']);
+
+ Route::prefix('master')->as('master.')->group(function () {
+        Route::prefix('drug/{drug}')->group(function () {
+            Route::post('repack', [DrugController::class, 'repack'])->name('drug.repack.store');
+            Route::delete('repack/{repack}', [DrugController::class, 'repack'])->name("drug.repack.destroy");
+        });
+        Route::resource('category', CategoryController::class)->except(['create', 'show', 'edit']);
+        Route::resource('vendor', VendorController::class)->except(['show']);
+        Route::resource('variant', VariantController::class)->except(['create', 'show', 'edit']);
+        Route::resource('manufacture', ManufactureController::class)->except(['create', 'show', 'edit']);
+        Route::resource('drug', DrugController::class)->except(['show']);
+    });
+
+// Route::middleware('auth')->group(function () {
+
+
+
+
 
     Route::prefix("inventory")->as('inventory.')->group(function () {
         Route::post("inflows/print", [InventoryFlowController::class, "print"])->name("inflows.print");
@@ -112,17 +129,7 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 
-    Route::prefix('master')->as('master.')->group(function () {
-        Route::prefix('drug/{drug}')->group(function () {
-            Route::post('repack', [DrugController::class, 'repack'])->name('drug.repack.store');
-            Route::delete('repack/{repack}', [DrugController::class, 'repack'])->name("drug.repack.destroy");
-        });
-        Route::resource('category', CategoryController::class)->except(['create', 'show', 'edit']);
-        Route::resource('vendor', VendorController::class)->except(['show']);
-        Route::resource('variant', VariantController::class)->except(['create', 'show', 'edit']);
-        Route::resource('manufacture', ManufactureController::class)->except(['create', 'show', 'edit']);
-        Route::resource('drug', DrugController::class)->except(['show']);
-    });
+
 
     Route::prefix("report")->as("report.")->group(function () {
         Route::controller(ReportController::class)->group(function () {
@@ -200,4 +207,4 @@ Route::middleware('auth')->group(function () {
     Route::get('/log', [TransactionController::class, 'index'])->name('transaction.index');
 
 
-});
+// });

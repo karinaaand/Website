@@ -30,7 +30,7 @@
         </a>
 <div class="relative inline-block text-left">
     <button onclick="toggleModal()" class="flex items-center justify-center w-10 h-10 bg-white border-none rounded-full focus:outline-none">
-        <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="Avatar" class="w-10 h-10 rounded-full">
+        <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full">
     </button>
 </div>
         <div id="modal" class="fixed inset-0 hidden bg-black bg-opacity-50 z-50">
@@ -41,36 +41,34 @@
                     </svg>
                 </button>
                <div class="relative w-16 h-16 bg-gray-200 rounded-full flex justify-start">
-                    <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="Avatar" class="rounded-full w-full h-full">
+                    <img src="" alt="Avatar" class="rounded-full w-full h-full">
                     <span class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></span>
                 </div>
                 <div class="mt-4 w-full">
                     <div class="flex items-center text-sm text-gray-600 font-semibold mb-2">
                         <span class="w-20 text-left flex-shrink-0">Nama</span>
                         <span class="">:</span>
-                        <span class="ml-1">{{ auth()->user()->name }}</span>
+                        <span id="sp-name" class="ml-1"></span>
                     </div>
                     <div class="flex items-center text-sm text-gray-600 font-semibold mb-2">
                         <span class="w-20 text-left flex-shrink-0">Role</span>
                         <span class="">:</span>
-                        <span class="ml-1">{{ auth()->user()->role }}</span>
+                        <span id="sp-role" class="ml-1"></span>
                     </div>
                     <div class="flex items-center text-sm text-gray-600 font-semibold mb-4">
                         <span class="w-20 text-left flex-shrink-0">Email</span>
                         <span class="">:</span>
-                        <span class="ml-1">{{ substr(auth()->user()->email,0,15) }}
-                            @if (strlen(auth()->user()->email)>15)
-                                {{ "***" }}
-                            @endif
-                        </span>
+                        <span id="sp-email" class="ml-1"></span>
                     </div>
                 </div>
                 <div class="mt-4 flex justify-center">
-                    @if (auth()->user()->role=="super")
+
+
+                    {{--  @if (auth()->user()->role=="super")  --}}
 
 
                     <a href="{{ route('user.settings') }}" class="bg-gray-300 hover:bg-blue-500 hover:text-white text-gray-700 py-2 px-4 rounded-lg flex items-center justify-center w-full text-center">
-                        <svg class="mr-2"  fill="#000000" height="20px" width="20px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                        <svg class="mr-2" fill="#000000" height="20px" width="20px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                             viewBox="0 0 478.703 478.703" xml:space="preserve">
                             <g>
                                 <g>
@@ -99,7 +97,7 @@
                             </g>
                         </svg>
                     Atur Profile Klinik</a>
-                    @endif
+                    {{--  @endif  --}}
                 </div>
                 <div class="mt-10 flex justify-center">
                     <!-- Icon Logout -->
@@ -120,5 +118,16 @@
         const modal = document.getElementById('modal');
         modal.classList.toggle('hidden');
     }
+    {{--  const user = JSON.parse(localStorage.getItem('user'));  --}}
+    console.log(user.avatar);
+    document.getElementById('user-avatar').src = user.avatar;
+    document.getElementById('sp-name').innerText  = user.name;
+    document.getElementById('sp-role').innerText  = user.role;
+    document.getElementById('sp-email').innerText  = user.email;
+
+     if (user.role === 'super') {
+         document.getElementById('list-masterdata').classList.remove('display-none');
+    }
+
 </script>
 

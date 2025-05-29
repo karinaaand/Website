@@ -118,7 +118,8 @@ class CategoryController extends ApiController
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|alpha:ascii|min:3|max:25|string',
+            // 'name' => 'required|alpha:ascii|min:3|max:25|string',
+            'name' => 'required|min:3|max:25|string',
             'code' => 'required|alpha|min:2|max:2'
         ]);
 
@@ -128,7 +129,7 @@ class CategoryController extends ApiController
 
         try {
             $category = Category::create($request->all());
-            
+
             // Load relationships manually
             $category->drugs = $category->drugs();
 
@@ -231,7 +232,8 @@ class CategoryController extends ApiController
     public function update(Request $request, Category $category)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|alpha:ascii|min:3|max:25|string',
+            // 'name' => 'required|alpha:ascii|min:3|max:25|string',
+            'name' => 'required|min:3|max:25|string',
             'code' => 'required|alpha|min:2|max:2'
         ]);
 
@@ -241,7 +243,7 @@ class CategoryController extends ApiController
 
         try {
             $category->update($request->all());
-            
+
             // Load relationships manually
             $category->drugs = $category->drugs();
 
@@ -296,7 +298,7 @@ class CategoryController extends ApiController
             if (count($category->drugs()) > 0) {
                 return $this->errorResponse('Cannot delete category with existing drugs', [], 422);
             }
-            
+
             $deletedData = $category->toArray();
             $category->delete();
 
@@ -347,4 +349,4 @@ class CategoryController extends ApiController
 
         return $this->successResponse($categories, 'Categories search results');
     }
-} 
+}

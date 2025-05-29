@@ -120,7 +120,11 @@
 
 <script>
     let formData;
-    function showModal(method,form) {
+    let linkUsed;
+    let formType;
+    function showModal(method,form, link, type) {
+        linkUsed = link;
+        formType = type;
         switch (method) {
             case "delete":
                 document.getElementById('deleteModal').classList.remove('hidden')
@@ -147,13 +151,30 @@
         formData = null;
     }
     function submitForm(){
-        try {
-
-            formData.removeEventListener('submit',()=>{});
-        } catch (error) {
-
+        let body;
+        if (formData){
+            var testForm = new FormData(formData);
+            body = Object.fromEntries(testForm.entries());
         }
-        formData.submit()
+
+        const token = localStorage.getItem('token');
+        if (token) {
+                axios(
+                {
+                    method: formType,
+                    url: linkUsed,
+                    data: body,
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Gagal', error);
+                });
+        }
     }
 
     function customSubmitForm(url){

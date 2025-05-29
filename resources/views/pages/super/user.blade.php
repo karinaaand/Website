@@ -1,17 +1,17 @@
 @extends('layouts.main')
 @section('container')
     <div class="p-6 bg-white rounded-lg shadow-lg">
-        @if (auth()->user()->role=="super")
-                
-        <div class="flex justify-between items-center mb-4">
-            <button onclick="showTambahModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg shadow transition-colors duration-200">+
+        {{--  @if (auth()->user()->role=="super")  --}}
+
+        <div  class="flex justify-between items-center mb-4">
+            <button id="tombol-tambah" onclick="showTambahModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg shadow transition-colors duration-200">+
                 Tambah User</button>
                 <form action="">
                     <input type="text" name="" id="" placeholder="Search..."
                     class="ring-2 ring-gray-300 rounded-full px-6 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </form>
             </div>
-            @endif
+            {{--  @endif  --}}
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <table class="min-w-full text-sm text-center">
                 <thead>
@@ -28,7 +28,7 @@
                     @php
                         $av = Storage::url($item->avatar);
                     @endphp
-                    @if (auth()->user()->role=='super')
+                    {{--  @if (auth()->user()->role=='super')  --}}
                     <tr class="border-b border-gray-200 hover:bg-gray-100">
                         <td class="py-3 px-6">{{ $number+1 }}</td>
                         <td class="py-3 px-6 text-left">{{ $item->name }}</td>
@@ -45,7 +45,7 @@
                                     <path d="M15.728 9.68602L14.314 8.27202L5 17.586V19H6.414L15.728 9.68602ZM17.142 8.27202L18.556 6.85802L17.142 5.44402L15.728 6.85802L17.142 8.27202ZM7.242 21H3V16.757L16.435 3.32202C16.6225 3.13455 16.8768 3.02924 17.142 3.02924C17.4072 3.02924 17.6615 3.13455 17.849 3.32202L20.678 6.15102C20.8655 6.33855 20.9708 6.59286 20.9708 6.85802C20.9708 7.12319 20.8655 7.37749 20.678 7.56502L7.243 21H7.242Z" fill="white"/>
                                 </svg>
                             </a>
-                            <button type="button" onclick="showModal('delete','delete-form-{{ $item->id }}')" type="button" class="bg-red-500 p-2 rounded-lg shadow hover:bg-red-600 transition-colors duration-200">
+                            <button type="button" onclick="showModal('delete','delete-form-{{ $item->id }}')" type="button" class="bg-red-500 p-2 rounded-lg shadow hover:bg-red-600 transition-colors duration-200 delete-gone">
                                 <svg width="20" height="21" viewBox="0 0 20 21" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -54,9 +54,9 @@
                                 </svg>
                             </button>
                         </td>
-                    </tr>                        
-                    @elseif($item->email==auth()->user()->email)
-                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                    </tr>
+                    {{--  @elseif($item->email==auth()->user()->email)  --}}
+                    {{--  <tr class="border-b border-gray-200 hover:bg-gray-100">
                         <td class="py-3 px-6">1</td>
                         <td class="py-3 px-6 text-left">{{ $item->name }}</td>
                         <td class="py-3 px-6">{{ $item->role }}</td>
@@ -73,8 +73,8 @@
                                 </svg>
                             </a>
                         </td>
-                    </tr>                        
-                    @endif
+                    </tr>  --}}
+                    {{--  @endif  --}}
                     @endforeach
                 </tbody>
             </table>
@@ -167,7 +167,7 @@
                             <label class="mb-2 block text-md font-medium text-left">Nama</label>
                             <input type="text" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" name="name" placeholder="Masukkan nama"/>
                         </div>
-                        @if (auth()->user()->role=='super')
+                        {{--  @if (auth()->user()->role=='super')  --}}
                         <div class="relative mb-4">
                             <label class="mb-2 block text-md font-medium text-left">Role</label>
                             <select name="role" class="w-full rounded border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -178,8 +178,8 @@
                                 <option value="admin">Apoteker</option>
                             </select>
                         </div>
-                            
-                        @endif
+
+                        {{--  @endif  --}}
                         <div class="mb-6">
                             <label class="mb-2 block text-md font-medium text-left">Email</label>
                             <input name="email" type="text" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan email"/>
@@ -215,7 +215,7 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">File format .xls (Max. 10Mb)</p>
                     </div>
                 </label>
-            </div> 
+            </div>
             <div class="flex justify-center space-x-4">
                 <button onclick="closeUploadModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:outline-none">
                     Batal
@@ -225,8 +225,17 @@
                 </button>
             </div>
         </div>
-    </div> 
+    </div>
     <script>
+        if (user.role === 'super') {
+         document.getElementById('tombol-tambah').style.visibility = "hidden";
+         const collection = document.getElementsByClassName("delete-gone");
+         for (let i = 0; i < collection.length; i++) {
+            collection[i].style.visibility = "hidden";
+        }
+
+
+    }
         document.getElementById('create-user-form').addEventListener('submit',function(e){
             e.preventDefault()
             showModal('add','create-user-form')
@@ -256,7 +265,7 @@
                     // if(document.querySelector('#uploadModal input[name="method"]').value=='add'){
                     //     document.getElementById('avatar-image').src = e.target.result
                     // }else{
-                        
+
                     // }
                     document.querySelector('#edit-user-form img').src = e.target.result
                 };
@@ -279,20 +288,20 @@
         function showTambahModal() {
             document.getElementById('tambahModal').classList.remove('hidden');
         }
-    
+
         function closeEditModal() {
             document.getElementById('edit-user-form').classList.add('hidden');
         }
-    
+
         function closeTambahModal() {
             document.getElementById('tambahModal').classList.add('hidden');
         }
-    
+
         function addUserModal() {
             document.getElementById('saveModal').classList.remove('hidden');
             document.getElementById('tambahModal').classList.add('hidden');
         }
-        
+
         function closeAddUserModal() {
             document.getElementById('saveModal').classList.add('hidden');
         }
@@ -314,7 +323,7 @@
     function closeUploadModal() {
         document.getElementById('uploadModal').classList.add('hidden');
     }
-    
+
     </script>
 @endsection
 
