@@ -30,7 +30,7 @@
         </a>
 <div class="relative inline-block text-left">
     <button onclick="toggleModal()" class="flex items-center justify-center w-10 h-10 bg-white border-none rounded-full focus:outline-none">
-        <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full">
+        <img id="user-avatar" src="{{ asset('assets/Avatar.jpg') }}" alt="Avatar" class="w-10 h-10 rounded-full">
     </button>
 </div>
         <div id="modal" class="fixed inset-0 hidden bg-black bg-opacity-50 z-50">
