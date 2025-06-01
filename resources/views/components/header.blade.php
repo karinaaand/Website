@@ -28,11 +28,11 @@
                     fill="white"/>
             </svg>
         </a>
-<div class="relative inline-block text-left">
-    <button onclick="toggleModal()" class="flex items-center justify-center w-10 h-10 bg-white border-none rounded-full focus:outline-none">
-        <img id="user-avatar" src="{{ asset('assets/Avatar.jpg') }}" alt="Avatar" class="w-10 h-10 rounded-full">
-    </button>
-</div>
+        <div class="relative inline-block text-left">
+            <button onclick="toggleModal()" class="flex items-center justify-center w-10 h-10 bg-white border-none rounded-full focus:outline-none">
+                <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full">
+            </button>
+        </div>
         <div id="modal" class="fixed inset-0 hidden bg-black bg-opacity-50 z-50">
             <div class="bg-white w-72 rounded-lg shadow-lg p-6 absolute top-4 right-4 text-left">
                 <button onclick="toggleModal()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 focus:outline-none">
@@ -41,7 +41,7 @@
                     </svg>
                 </button>
                <div class="relative w-16 h-16 bg-gray-200 rounded-full flex justify-start">
-                    <img src="" alt="Avatar" class="rounded-full w-full h-full">
+                    <img id="user-avatar-modal" src="" alt="Avatar" class="rounded-full w-full h-full">
                     <span class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></span>
                 </div>
                 <div class="mt-4 w-full">
@@ -101,12 +101,12 @@
                 </div>
                 <div class="mt-10 flex justify-center">
                     <!-- Icon Logout -->
-                    <a href="{{ route('user.logout') }}" class="bg-gray-300 hover:bg-blue-500 hover:text-white text-gray-700 py-2 px-4 rounded-lg flex items-center justify-center w-full text text-center">
+                    <button id="logout" class="bg-gray-300 hover:bg-blue-500 hover:text-white text-gray-700 py-2 px-4 rounded-lg flex items-center justify-center w-full text text-center">
                         <svg class="mr-2" width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M9.00195 7C9.01406 4.82497 9.11051 3.64706 9.87889 2.87868C10.7576 2 12.1718 2 15.0002 2L16.0002 2C18.8286 2 20.2429 2 21.1215 2.87868C22.0002 3.75736 22.0002 5.17157 22.0002 8L22.0002 16C22.0002 18.8284 22.0002 20.2426 21.1215 21.1213C20.2429 22 18.8286 22 16.0002 22H15.0002C12.1718 22 10.7576 22 9.87889 21.1213C9.11051 20.3529 9.01406 19.175 9.00195 17" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
                             <path d="M15 12L2 12M2 12L5.5 9M2 12L5.5 15" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                        Keluar</a>
+                        Keluar</button>
                 </div>
             </div>
         </div>
@@ -120,7 +120,9 @@
     }
     {{--  const user = JSON.parse(localStorage.getItem('user'));  --}}
     console.log(user.avatar);
-    document.getElementById('user-avatar').src = user.avatar;
+    // document.getElementById('user-avatar').src = user.avatar;
+    document.getElementById('user-avatar').src = 'http://localhost:8000/storage/' + user.avatar;
+    document.getElementById('user-avatar-modal').src = 'http://localhost:8000/storage/' + user.avatar;
     document.getElementById('sp-name').innerText  = user.name;
     document.getElementById('sp-role').innerText  = user.role;
     document.getElementById('sp-email').innerText  = user.email;
@@ -128,6 +130,22 @@
      if (user.role === 'super') {
          document.getElementById('list-masterdata').classList.remove('display-none');
     }
+
+    document.getElementById('logout').addEventListener('click', async () => {
+        try {
+            await axios.post('http://localhost:8000/api/v1/logout', {}, {
+                headers: {
+                    Authorization: 'Bearer ' + localStorage.getItem('token')
+                }
+            });
+
+            // Hapus token, redirect ke login
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        } catch (err) {
+            alert('Gagal logout');
+        }
+    });
 
 </script>
 
