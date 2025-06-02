@@ -227,7 +227,8 @@
         </div>
     </div>
     <script>
-        if (user.role === 'super') {
+        const user = @json(auth()->user());
+        if (user && user.role === 'super') {
          document.getElementById('tombol-tambah').style.visibility = "hidden";
          const collection = document.getElementsByClassName("delete-gone");
          for (let i = 0; i < collection.length; i++) {
