@@ -101,22 +101,18 @@
             <div class="mt-6">
                 <table class="w-full text-sm">
                     <thead>
-                        <th class="py-3 px-6 text-center">No Transaksi</th>
-                        <th class="py-3 px-6 text-center">Tanggal</th>
-                        <th class="py-3 px-6 text-center">Subtotal</th>
+                        <th class="py-3 px-6 text-left">No Transaksi</th>
+                        <th class="py-3 px-6 text-left">Tanggal</th>
+                        <th class="py-3 px-6 text-left">Subtotal</th>
                     </thead>
-                </table>
-            </div>
-            <div class="overflow-auto max-h-[50vh]">
-                <table class="w-full text-sm">
                     <tbody id="history-tbody">
                         {{--  @foreach ($histories as $item)
                         <tr>
-                        <td class="text-center py-3">{{ $item->code }}</td>
-                        <td class="text-center py-3">{{ Carbon::parse($item->created_at)->translatedFormat('j F Y') }}</td>
-                        <td class="text-center py-3">{{ 'Rp ' . number_format($item->income, 0, ',', '.') }}</td>
+                        <td class="text-left px-6 py-3">{{ $item->code }}</td>
+                        <td class="text-left px-6 py-3">{{ Carbon::parse($item->created_at)->translatedFormat('j F Y') }}</td>
+                        <td class="text-left px-6 py-3">{{ 'Rp ' . number_format($item->income, 0, ',', '.') }}</td>
                         </tr>
-
+        
                         @endforeach  --}}
                     </tbody>
                 </table>
@@ -432,10 +428,10 @@ function tampilkanRiwayatTransaksi(dataList) {
 
     dataList.forEach(data => {
         tbody.innerHTML += `
-            <tr class="justify-center">
-                <td class="text-center py-3">${data['No Transaksi']}</td>
-                <td class="text-center py-3">${data['Date'].substring(0, 10)}</td>
-                <td class="text-center py-3">${data['Subtotal']}</td>
+            <tr>
+                <td class="text-left px-6 py-3">${data['No Transaksi']}</td>
+                <td class="text-left px-6 py-3">${data['Date'].substring(0, 10)}</td>
+                <td class="text-left px-6 py-3">${data['Subtotal']}</td>
             </tr>
         `;
     });
