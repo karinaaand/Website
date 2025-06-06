@@ -15,7 +15,7 @@
         <ul class="space-y-2 font-medium">
             <li>
                 <div style="margin-bottom: 30px; margin-left: 40px;">
-                    <img src="{{ Storage::url(App\Models\Profile::first()->logo) }}" alt="Simbat Logo"
+                    <img src="{{ asset('assets/logo.jpg') }}" alt="Simbat Logo"
                         style="width: 40px; height: 40px; margin-right: 3px; vertical-align: middle; display: inline-block;">
                     <span
                         style="font-size: 20px; font-weight: bold; vertical-align: middle; display: inline-block;">Simbat</span>
