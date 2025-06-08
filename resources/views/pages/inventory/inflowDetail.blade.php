@@ -11,22 +11,29 @@
     <div class="rounded-lg bg-white p-6 shadow-lg">
         <div class="mb-4 flex items-center">
             <div class="flex-1 mr-5">
-                <h2 class="text-xl font-bold text-left">{{ App\Models\Profile::first()->name }}</h2>
-                <h2 class="text-sm text-left">{{ App\Models\Profile::first()->address }}</h2>
-                <h2 class="text-sm text-left">{{ App\Models\Profile::first()->phone }}</h2>
+                <h2 id="profile-name" class="text-xl font-bold text-left"></h2>
+                <h2 id="profile-address" class="text-sm text-left"></h2>
+                <h2 id="profile-phone" class="text-sm text-left"></h2>
             </div>
             <div class="flex-[1.5] flex flex-col  items-center justify-center">
                 <div class="flex items-center">
                     <span class="mr-2 font-normal text-black">No. LPB :</span>
-                    <span>{{ $transaction->code }}</span>
+                    <span id="no-lbp"></span>
                 </div>
                 <h1 class="text-center text-2xl font-bold">LAPORAN PENERIMAAN BARANG</h1>
             </div>
             <div class="flex-1 ml-10">
-                <p class="text-sm mb-4 text-left">Tanggal: {{ Carbon::parse($transaction->created_at)->translatedFormat('j F Y') }}</p>
-                <h2 class="text-lg font-bold text-left">{{ $transaction->vendor()->name }}</h2>
+                <!-- <p class="text-sm mb-4 text-left">Tanggal: {{ Carbon::parse($transaction->created_at)->translatedFormat('j F Y') }}</p> -->
+                <p class="text-sm mb-4 text-left">Tanggal:
+                    <span id="date"></span>
+                </p>
+
+                <!-- <h2 class="text-lg font-bold text-left">{{ $transaction->vendor()->name }}</h2>
                 <h2 class="text-sm text-left">{{ $transaction->vendor()->address }}</h2>
-                <h2 class="text-sm text-left">{{ $transaction->vendor()->phone }}</h2>
+                <h2 class="text-sm text-left">{{ $transaction->vendor()->phone }}</h2> -->
+                <h2 id="vendor-name" class="text-lg font-bold text-left"></h2>
+                <h2 id="vendor-address" class="text-sm text-left"></h2>
+                <h2 id="vendor-phone" class="text-sm text-left"></h2>
             </div>
         </div>
         <div class="overflow-hidden rounded-lg bg-white shadow-md mt-8">
@@ -41,21 +48,13 @@
                         <th class="border p-2">Subtotal</th>
                     </tr>
                 </thead>
-                <tbody class="text-gray-700">
-                    @foreach ($details as $number=>$item)
-                    <tr class="border-b border-gray-200 hover:bg-gray-100">
-                        <td class="px-6 py-3 text-center">{{ $number+1 }}</td>
-                        <td class="px-6 py-3 text-center">{{ $item->drug()->code }}</td>
-                        <td class="px-6 py-3 text-left">{{ $item->drug()->name }}</td>
-                        <td class="px-6 py-3 text-center">{{ $item->quantity }}</td>
-                        <td class="px-6 py-3 text-center">{{ 'Rp ' . number_format($item->piece_price, 0, ',', '.') }}</td>
-                        <td class="px-6 py-3 text-center">{{ 'Rp ' . number_format($item->total_price, 0, ',', '.') }}</td>
-                    </tr>
+                <tbody id="tabel" class="text-gray-700">
 
-                    @endforeach
                 </tbody>
             </table>
-            <h2 type="text" class="text-right mt-6 pe-6 pb-6">Grand total : {{ 'Rp ' . number_format($transaction->outcome, 0, ',', '.') }}</h2>
+            <h2 type="text" class="text-right mt-6 pe-6 pb-6">Grand total : Rp <span id="grand-total"></span></h2>
+            <!-- <h2 type="text" class="text-right mt-6 pe-6 pb-6">Grand total : {{ 'Rp ' . number_format($transaction->outcome, 0, ',', '.') }}</h2> -->
+
         </div>
     </div>
     <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -85,51 +84,75 @@
             </div>
         </div>
     </div>
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-            function uploadModal() {
-            document.getElementById('uploadModal').classList.remove('hidden');
-        }
-        function closeUploadModal(transaction_id) {
-            document.getElementById('uploadModal').classList.add('hidden');
+        
+    document.addEventListener('DOMContentLoaded', function () {
+        const API_BASE_URL = 'http://localhost:8000/api/v1';
+        const token = localStorage.getItem('token');
 
-            if (!transaction_id) {
-                console.error("Transaction ID is missing!");
-                return;
+        const urlParts = window.location.pathname.split('/');
+        const id = urlParts[urlParts.length - 1]; // ambil ID dari URL
+
+        const api = axios.create({
+            baseURL: API_BASE_URL,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
+        });
 
-            console.log("Download button clicked, transaction ID:", transaction_id); // Debugging
-
-            // Redirect langsung ke endpoint Laravel
-            window.location.href = `/inventory/export/${transaction_id}`;
-        }
-
-        function submitModal(transaction_id) {
-            document.getElementById('uploadModal').classList.add('hidden');
-
-            if (!transaction_id) {
-                console.error("Transaction ID is missing!");
-                return;
+        axios.get(`${API_BASE_URL}/inventory/inflows/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
+        })
 
-            console.log("Download button clicked, transaction ID:", transaction_id); // Debugging
+        .then(response => {
+            console.log('Response data:', response.data);
+            // const profile = response.data.data.Profile;
+            const data = response.data.data;
+            
+            document.getElementById('profile-name').textContent = data.Profile.name;
+            document.getElementById('profile-address').textContent = data.Profile.address;
+            document.getElementById('profile-phone').textContent = data.Profile.phone;
+            document.getElementById('no-lbp').textContent = data["No. LPB"];
+            document.getElementById('date').textContent = data["Date"];
+            document.getElementById('vendor-name').textContent = data.Vendor.name;
+            document.getElementById('vendor-address').textContent = data.Vendor.address;
+            document.getElementById('vendor-phone').textContent = data.Vendor.phone;
 
-            // Redirect langsung ke endpoint Laravel
-            window.location.href = `/inventory/generate-pdf/${transaction_id}`;
-        }
+            // Tabel detail
+            const tbodyEl = document.getElementById('tabel');
+            tbodyEl.innerHTML = ''; // kosongkan dulu
 
+            data.Details.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                console.log(item);
 
-        document.getElementById('printButton').onclick = function () {
-            document.getElementById('printOptions').classList.toggle('invisible');
-        };
-        document.getElementById('confirmPrint').onclick = function () {
-            const format = document.getElementById('format').value;
-            if (format === 'pdf') {
-                alert('Mencetak dalam format PDF...');
-            } else if (format === 'excel') {
-                alert('Mencetak dalam format Excel...');
-            }
-            document.getElementById('printOptions').classList.add('invisible');
-        };
+                tr.innerHTML = `
+                    <td class="px-6 py-3 text-center">${index + 1}</td>
+                    <td class="px-6 py-3 text-center">${item.drug_code}</td>
+                    <td class="px-6 py-3 text-center">${item.drug_name}</td>
+                    <td class="px-6 py-3 text-center">${item.total}</td>
+                    <td class="px-6 py-3 text-center">Rp ${item.piece_price}</td>
+                    <td class="px-6 py-3 text-center">Rp ${item.subtotal}</td>
+                `;
+
+                tbodyEl.appendChild(tr);
+            });
+
+            document.getElementById('grand-total').textContent = data.Grand_total;
+
+        })
+        .catch(error => {
+            console.error('Gagal ambil data profile:', error);
+        });
+    });
+
     </script>
+
+
 @endsection
