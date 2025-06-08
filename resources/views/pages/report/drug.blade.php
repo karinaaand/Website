@@ -5,7 +5,7 @@ use Carbon\Carbon;
 @section('container')
 <div class="rounded-lg bg-white p-6 shadow-lg">
     <div class="flex flex-1 justify-end mb-5">
-        <button onclick="printModal()" class="rounded-lg bg-yellow-500 hover:bg-yellow-600 px-4 py-1 text-white">Cetak</button>
+        <button id="printButton" onclick="printModal()" class="rounded-lg bg-yellow-500 hover:bg-yellow-600 px-4 py-1 text-white">Cetak</button>
     </div>
     <div class="flex items-center justify-between w-full">
         <form action="" class="flex w-auto flex-row justify-between gap-3 ">
@@ -97,8 +97,22 @@ use Carbon\Carbon;
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-       function printModal() {
+    // Configuration
+    const API_BASE_URL = 'http://localhost:8000/api/v1';
+    const per_page = 5;
+    const token = localStorage.getItem('token');
+
+    // State variables
+    let timeout = null;
+    let selectedId;
+    let query = "";
+    let temporaryData;
+    let data_kategori = null;
+    const categoryInput = document.getElementById('category-search');
+
+    function printModal() {
         document.getElementById('printModal').classList.remove('hidden');
     }
 
@@ -122,14 +136,14 @@ use Carbon\Carbon;
     document.getElementById('printButton').onclick = function() {
         document.getElementById('printOptions').classList.toggle('invisible');
     };
-    document.getElementById('confirmPrint').onclick = function() {
-        const format = document.getElementById('format').value;
-        if (format === 'pdf') {
-            alert('Mencetak dalam format PDF...');
-        } else if (format === 'excel') {
-            alert('Mencetak dalam format Excel...');
-        }
-        document.getElementById('printOptions').classList.add('invisible');
-    };
+    // document.getElementById('confirmPrint').onclick = function() {
+    //     const format = document.getElementById('format').value;
+    //     if (format === 'pdf') {
+    //         alert('Mencetak dalam format PDF...');
+    //     } else if (format === 'excel') {
+    //         alert('Mencetak dalam format Excel...');
+    //     }
+    //     document.getElementById('printOptions').classList.add('invisible');
+    // };
 </script>
 @endsection
