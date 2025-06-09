@@ -39,8 +39,17 @@ use Carbon\Carbon;
             </tbody>
         </table>
     </div>
-    <!-- <div id="pagianation" class="p-6">
-    </div> -->
+     <!-- Pagination and Showing Info Section -->
+        <div class="flex items-center justify-between p-4">
+            <div>
+                <p class="text-gray-700 text-sm" id="pagination-info">
+                    Showing 0 to 0 of 0 results
+                </p>
+            </div>
+            <div id="pagination-div">
+                {{-- Pagination will be populated by JavaScript --}}
+            </div>
+        </div>
 </div>
 <div id="printModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-lg p-6 w-96 relative">
@@ -79,7 +88,7 @@ use Carbon\Carbon;
 <script>
     // Configuration
     const API_BASE_URL = 'http://localhost:8000/api/v1';
-    const per_page = 100;
+    const per_page = 5;
     const token = localStorage.getItem('token');
 
     // State variables
@@ -123,8 +132,10 @@ use Carbon\Carbon;
         api.get(`/reports/drugs?${params.toString()}`)
             .then(response => {
                 data_stocks = response.data;
+                // pagi = response.pagination;
                 renderStockTable(data_stocks);
-                // updatePaginationInfo(data_stocks.data);
+                // console.log('Data stok:', data_stocks.pagination);
+                updatePaginationInfo(data_stocks.pagination);
                 // updatePagination(data_stocks.data);
             })
             .catch(error => {
@@ -165,27 +176,31 @@ use Carbon\Carbon;
 
         // Simpan data asli untuk filter
         globalStockData = stockData.data;
+        globalPage = stockData.pagination;
 
         // Render awal
-        updateTable(globalStockData);
-        // renderPagination(globalStockData);
+        updateTable(globalStockData, globalPage);
+        renderPagination(globalPage);
     }
 
-    function updateTable(data) {
+    function updateTable(data, page) {
         const tbody = document.querySelector('tbody');
         tbody.innerHTML = '';
-
+        
         // Hitung data yang akan ditampilkan di halaman saat ini
         const startIndex = (currentPage - 1) * per_page;
+        const current = (page.current_page - 1) * per_page;
         const endIndex = startIndex + per_page;
         const paginatedData = data.slice(startIndex, endIndex);
+        console.log('currentPage:', current);
+        
 
         paginatedData.forEach((item, index) => {
             const row = document.createElement('tr');
             row.className = 'border-b border-gray-200 hover:bg-gray-100';
 
             row.innerHTML = `
-                <td class="py-3">${startIndex + index + 1}</td>
+                <td class="py-3">${current + index + 1}</td>
                 <td class="py-3">${item.drug_code}</td>
                 <td class="py-3">${item.drug_name}</td>
                 <td class="py-3">${item.quantity} pcs</td>
@@ -203,6 +218,101 @@ use Carbon\Carbon;
 
             tbody.appendChild(row);
         });
+
+        // renderPagination(stockData);
+
+    }
+
+    function updatePaginationInfo(data) {
+        console.log('Pagination data:', data);
+        const start = ((data.current_page - 1) * data.per_page) + 1;
+        const end = Math.min(data.current_page * data.per_page, data.total);
+        const total = data.total;
+
+        document.getElementById('pagination-info').textContent =
+            `Showing ${start} to ${end} of ${total} results`;
+    }
+
+    function renderPagination(pagination) {
+        const currentPage = pagination.current_page;
+        const lastPage = pagination.last_page;
+        // console.log('Current Page:', currentPage);
+        
+        let elements = '<nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">';
+
+        // Previous button
+        elements += `<span onclick="${currentPage === 1 ? '' : `getDataPage(${currentPage - 1})`}"
+                class="relative inline-flex items-center px-4 py-2 text-sm font-medium
+                ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 cursor-pointer hover:bg-gray-50'}
+                bg-white border border-gray-300 rounded-l-md leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
+                ${currentPage === 1 ? 'disabled aria-disabled="true"' : ''}>
+                &lsaquo;
+                </span>`;
+
+        // Tombol-tombol halaman
+        // Tampilkan maksimal 5 tombol halaman
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(lastPage, currentPage + 2);
+        
+        if (currentPage <= 3) {
+            endPage = Math.min(5, lastPage);
+        }
+        
+        if (currentPage >= lastPage - 2) {
+            startPage = Math.max(1, lastPage - 4);
+        }
+
+        // Tombol pertama jika diperlukan
+        if (startPage > 1) {
+            elements += `<span onclick="getDataPage(1)" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">1</span>`;
+            if (startPage > 2) {
+                elements += '<span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5">...</span>';
+            }
+        }
+
+        // Tombol halaman
+        for (let i = startPage; i <= endPage; i++) {
+            elements += `<span onclick="getDataPage(${i})" 
+                class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium
+                ${i === currentPage ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}
+                border border-gray-300 leading-5 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+                ${i}
+                </span>`;
+        }
+
+        // Tombol terakhir jika diperlukan
+        if (endPage < lastPage) {
+            if (endPage < lastPage - 1) {
+                elements += '<span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5">...</span>';
+            }
+            elements += `<span onclick="getDataPage(${lastPage})" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">${lastPage}</span>`;
+        }
+
+        // Next button
+        elements += `<span onclick="${currentPage === lastPage ? '' : `getDataPage(${currentPage + 1})`}"
+                class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium
+                ${currentPage === lastPage ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 cursor-pointer hover:bg-gray-50'}
+                bg-white border border-gray-300 rounded-r-md leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
+                ${currentPage === lastPage ? 'disabled aria-disabled="true"' : ''}>
+                &rsaquo;
+                </span>`;
+        elements += '</nav>';
+
+        document.getElementById("pagination-div").innerHTML = elements;
+    }
+
+    // Pagination handler
+    function getDataPage(page) {
+        if (query.length > 0) {
+            api.get(`/reports/drugs?${params.toString()}`)
+                .then(response => {
+                    temporaryData = response.data;
+                    renderStockTable(temporaryData);
+                    updatePaginationInfo(temporaryData.data);
+                });
+        } else {
+            fetchStocks('', page);
+        }
     }
 
     // Utility Functions
