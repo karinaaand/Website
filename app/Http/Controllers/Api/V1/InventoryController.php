@@ -51,6 +51,35 @@ class InventoryController extends ApiController
      * )
      */
 
+    //after
+    public function getInflows(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $inflows = Transaction::where('variant', 'LPB')
+            ->paginate($perPage);
+
+        $formattedInflows = $inflows->map(function ($inflow) {
+            return [
+                'id' => $inflow->id, // Include ID for reference (tambahan)
+                'No. LPB' => $inflow->code,
+                'Vendor' => $inflow->vendor()->name,
+                'Date' => Carbon::parse($inflow->created_at)->isoFormat('D MMMM Y')
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Inflows retrieved successfully',
+            'data' => $formattedInflows,
+            'pagination' => [
+            'current_page' => $inflows->currentPage(),
+            'per_page' => $inflows->perPage(),
+            'total' => $inflows->total(),
+            'last_page' => $inflows->lastPage(),
+            ],
+        ]);
+    }
+
     // before
     // public function getInflows(Request $request)
     // {
@@ -72,29 +101,6 @@ class InventoryController extends ApiController
     //         'data' => $formattedInflows,
     //     ]);
     // }
-
-    // after
-    public function getInflows(Request $request)
-    {
-        $perPage = $request->input('per_page', 10);
-        $inflows = Transaction::where('variant', 'LPB')
-            ->paginate($perPage);
-
-        $formattedInflows = $inflows->map(function ($inflow) {
-            return [
-                'id' => $inflow->id, // Include ID for reference (tambahan)
-                'No. LPB' => $inflow->code,
-                'Vendor' => $inflow->vendor()->name,
-                'Date' => Carbon::parse($inflow->created_at)->isoFormat('D MMMM Y')
-            ];
-        });
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Inflows retrieved successfully',
-            'data' => $formattedInflows,
-        ]);
-    }
 
     /**
      * @OA\Get(
