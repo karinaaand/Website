@@ -225,11 +225,11 @@
             api.get(`/inventory/inflows?per_page=${per_page}`)
                 .then(response => {
                     temporaryData = response.data;
-                    renderStockTable(temporaryData);
+                    renderInflowTable(temporaryData);
                     updatePaginationInfo(temporaryData.data);
                 });
         } else {
-            fetchStocks('', page);
+            fetchInflow('', page);
         }
     }
 </script>
