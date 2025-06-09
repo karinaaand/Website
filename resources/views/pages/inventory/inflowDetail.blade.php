@@ -87,70 +87,101 @@
     
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        
-    document.addEventListener('DOMContentLoaded', function () {
-        const API_BASE_URL = 'http://localhost:8000/api/v1';
-        const token = localStorage.getItem('token');
-
-        const urlParts = window.location.pathname.split('/');
-        const id = urlParts[urlParts.length - 1]; // ambil ID dari URL
-
-        const api = axios.create({
-            baseURL: API_BASE_URL,
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        axios.get(`${API_BASE_URL}/inventory/inflows/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-
-        .then(response => {
-            console.log('Response data:', response.data);
-            // const profile = response.data.data.Profile;
-            const data = response.data.data;
             
-            document.getElementById('profile-name').textContent = data.Profile.name;
-            document.getElementById('profile-address').textContent = data.Profile.address;
-            document.getElementById('profile-phone').textContent = data.Profile.phone;
-            document.getElementById('no-lbp').textContent = data["No. LPB"];
-            document.getElementById('date').textContent = data["Date"];
-            document.getElementById('vendor-name').textContent = data.Vendor.name;
-            document.getElementById('vendor-address').textContent = data.Vendor.address;
-            document.getElementById('vendor-phone').textContent = data.Vendor.phone;
+        document.addEventListener('DOMContentLoaded', function () {
+            const API_BASE_URL = 'http://localhost:8000/api/v1';
+            const token = localStorage.getItem('token');
 
-            // Tabel detail
-            const tbodyEl = document.getElementById('tabel');
-            tbodyEl.innerHTML = ''; // kosongkan dulu
+            const urlParts = window.location.pathname.split('/');
+            const id = urlParts[urlParts.length - 1]; // ambil ID dari URL
 
-            data.Details.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                console.log(item);
-
-                tr.innerHTML = `
-                    <td class="px-6 py-3 text-center">${index + 1}</td>
-                    <td class="px-6 py-3 text-center">${item.drug_code}</td>
-                    <td class="px-6 py-3 text-center">${item.drug_name}</td>
-                    <td class="px-6 py-3 text-center">${item.total}</td>
-                    <td class="px-6 py-3 text-center">Rp ${item.piece_price}</td>
-                    <td class="px-6 py-3 text-center">Rp ${item.subtotal}</td>
-                `;
-
-                tbodyEl.appendChild(tr);
+            const api = axios.create({
+                baseURL: API_BASE_URL,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
 
-            document.getElementById('grand-total').textContent = data.Grand_total;
+            axios.get(`${API_BASE_URL}/inventory/inflows/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
 
-        })
-        .catch(error => {
-            console.error('Gagal ambil data profile:', error);
+            .then(response => {
+                console.log('Response data:', response.data);
+                // const profile = response.data.data.Profile;
+                const data = response.data.data;
+                
+                document.getElementById('profile-name').textContent = data.Profile.name;
+                document.getElementById('profile-address').textContent = data.Profile.address;
+                document.getElementById('profile-phone').textContent = data.Profile.phone;
+                document.getElementById('no-lbp').textContent = data["No. LPB"];
+                document.getElementById('date').textContent = data["Date"];
+                document.getElementById('vendor-name').textContent = data.Vendor.name;
+                document.getElementById('vendor-address').textContent = data.Vendor.address;
+                document.getElementById('vendor-phone').textContent = data.Vendor.phone;
+
+                // Tabel detail
+                const tbodyEl = document.getElementById('tabel');
+                tbodyEl.innerHTML = ''; // kosongkan dulu
+
+                data.Details.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                    console.log(item);
+
+                    tr.innerHTML = `
+                        <td class="px-6 py-3 text-center">${index + 1}</td>
+                        <td class="px-6 py-3 text-center">${item.drug_code}</td>
+                        <td class="px-6 py-3 text-center">${item.drug_name}</td>
+                        <td class="px-6 py-3 text-center">${item.total}</td>
+                        <td class="px-6 py-3 text-center">Rp ${item.piece_price}</td>
+                        <td class="px-6 py-3 text-center">Rp ${item.subtotal}</td>
+                    `;
+
+                    tbodyEl.appendChild(tr);
+                });
+
+                document.getElementById('grand-total').textContent = data.Grand_total;
+
+            })
+            .catch(error => {
+                console.error('Gagal ambil data profile:', error);
+            });
         });
-    });
+
+        function uploadModal() {
+            document.getElementById('uploadModal').classList.remove('hidden');
+        }
+        function closeUploadModal(transaction_id) {
+            document.getElementById('uploadModal').classList.add('hidden');
+
+            if (!transaction_id) {
+                console.error("Transaction ID is missing!");
+                return;
+            }
+
+            console.log("Download button clicked, transaction ID:", transaction_id); // Debugging
+
+            // Redirect langsung ke endpoint Laravel
+            window.location.href = `/inventory/export/${transaction_id}`;
+        }
+
+        function submitModal(transaction_id) {
+            document.getElementById('uploadModal').classList.add('hidden');
+
+            if (!transaction_id) {
+                console.error("Transaction ID is missing!");
+                return;
+            }
+
+            console.log("Download button clicked, transaction ID:", transaction_id); // Debugging
+
+            // Redirect langsung ke endpoint Laravel
+            window.location.href = `/inventory/generate-pdf/${transaction_id}`;
+        }
 
     </script>
 

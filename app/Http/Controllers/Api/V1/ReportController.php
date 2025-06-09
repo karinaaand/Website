@@ -47,6 +47,8 @@ class ReportController extends ApiController
      *     )
      * )
      */
+
+    // after
     public function getDrugReport(Request $request)
     {
         $perPage = $request->input('per_page', 10);
@@ -55,6 +57,7 @@ class ReportController extends ApiController
         $formattedStocks = $stocks->map(function ($stock) {
             $drug = $stock->data;
             return [
+                'id' => $drug->id, //tambahan lagi untuk mengembalikan ID obat
                 'drug_code' => $drug->code,
                 'drug_name' => $drug->name,
                 'quantity' => floor($stock->quantity / $drug->piece_netto),
@@ -69,6 +72,30 @@ class ReportController extends ApiController
             'data' => $formattedStocks
         ]);
     }
+
+    // before
+    // public function getDrugReport(Request $request)
+    // {
+    //     $perPage = $request->input('per_page', 10);
+    //     $stocks = Warehouse::with('data')->paginate($perPage);
+
+    //     $formattedStocks = $stocks->map(function ($stock) {
+    //         $drug = $stock->data;
+    //         return [
+    //             'drug_code' => $drug->code,
+    //             'drug_name' => $drug->name,
+    //             'quantity' => floor($stock->quantity / $drug->piece_netto),
+    //             'oldest_expired' => Carbon::parse($stock->oldest)->format('d-m-Y'),
+    //             'latest_expired' => Carbon::parse($stock->latest)->format('d-m-Y')
+    //         ];
+    //     });
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'message' => 'Drug report retrieved successfully',
+    //         'data' => $formattedStocks
+    //     ]);
+    // }
 
     /**
      * @OA\Get(
