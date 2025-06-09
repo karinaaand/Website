@@ -191,26 +191,40 @@
         const drugInput = document.querySelector("input[name='drug']")
         const unitInput = document.querySelector("select[name='unit']")
         const quantityInput = document.querySelector("input[name='quantity']")
-        unitInput.addEventListener('change', function(e) {
-            const name = drugInput.value
-            fetch(`/get-drug-price/${name}/${unitInput.value}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.querySelector("input[name='price']").value = data.price * (
-                        quantityInput.value == 0 ? 1 : quantityInput.value);
-                })
-                .catch(error => console.error('Error:', error));
-        })
-        quantityInput.addEventListener('input', function(e) {
-            const name = drugInput.value
-            fetch(`/get-drug-price/${name}/${unitInput.value}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.querySelector("input[name='price']").value = data.price * quantityInput
-                        .value;
-                })
-                .catch(error => console.error('Error:', error));
-        })
+
+        // Add error handling for fetch requests
+        const getDrugPrice = async (name, unit) => {
+            try {
+                const response = await fetch(`${window.location.origin}/get-drug-price/${name}/${unit}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching drug price:', error);
+                return null;
+            }
+        };
+
+        unitInput.addEventListener('change', async function() {
+            const name = drugInput.value;
+            if (!name) return;
+            
+            const data = await getDrugPrice(name, unitInput.value);
+            if (data && data.price) {
+                document.querySelector("input[name='price']").value = 
+                    data.price * (quantityInput.value == 0 ? 1 : quantityInput.value);
+            }
+        });
+
+        quantityInput.addEventListener('input', async function() {
+            const name = drugInput.value;
+            if (!name) return;
+            
+            const data = await getDrugPrice(name, unitInput.value);
+            if (data && data.price) {
+                document.querySelector("input[name='price']").value = 
+                    data.price * quantityInput.value;
+            }
+        });
         let timeout = null;
 
         drugInput.addEventListener('input', function() {
